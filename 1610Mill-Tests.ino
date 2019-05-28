@@ -4,8 +4,9 @@
  * Using 1610 CNC Kit
  *
  * Author: John Glatts
- * Date: 5/24/19
+ * Date: 5/22/19
  *
+ * Working sketch to go back home after 3 'parts' have been cut
  * POS DIR = Towards Motor
  * NEG DIR = Away from Motor
  *
@@ -15,6 +16,8 @@
  *      - use the dirty way and try to record individual steps
  *      - First test:
  *          - 2653 steps = 1 inch
+ *      - Second test:
+ *          - 2540 steps = 1 inch --> setting is currently used
  *
  */
 #include <AccelStepper.h>
@@ -22,6 +25,10 @@
 
 #define low_limit 11
 #define inch_limit 12
+
+
+// macros for step indexingg
+#define INCH 2540
 
 
 AccelStepper stepper(AccelStepper::DRIVER, 9, 10);
@@ -36,11 +43,13 @@ void setup() {
     pinMode(inch_limit, INPUT_PULLUP);
     // lower speed to use with smallMove()
     stepper.setMaxSpeed(1000);
-    stepper.setSpeed(750);
+    stepper.setSpeed(1000);
     stepper.setAcceleration(1000);
     homeMotor();
+    delay(1000);
     moveOneInch();
-    homeMotor();
+    //cutElement(4, .25);
+    //homeMotor();
 }
 
 
@@ -79,14 +88,13 @@ void homeMotor() {
     while (digitalRead(low_limit)) {
         stepper.moveTo(homing);
         homing++;  // decrease by 1 for next move if needed
-        stepper.setSpeed(750);
+        stepper.setSpeed(700);
         stepper.runSpeedToPosition(); // run the motor CCW towards the switch
     }
-
     stepper.setCurrentPosition(0);
-    stepper.moveTo(-100);
 
     // move the stepper a bit away
+    stepper.moveTo(-100);
     while (stepper.currentPosition() != -100) // Full speed
         stepper.run();
     stepper.stop();
@@ -100,11 +108,11 @@ void moveOneInch() {
     // only 2 groups
     for (int i = 0; i < 2; ++i) {
         // testing precision movement
-        stepper.moveTo(-2653);
-        while (stepper.currentPosition() != -2653) // Full speed
+        stepper.moveTo(-INCH);
+        while (stepper.currentPosition() != -INCH) // Full speed
             stepper.run();
-        stepper.stop(); // Stop as fast as possible: sets new target
-        delay(250); // quarter second wait -- blade will come down
+        stepper.stop(); // stop as fast as possible: sets new target
+        delay(1000); // second wait -- blade will come down
         stepper.setCurrentPosition(0);  // reset the position and move on to another part
     }
 
@@ -126,6 +134,23 @@ void calcInchMove() {
     stepper.stop();
 }
 
+/*
+ * Cut the elements
+ *      @param quantity = number of elements to cut
+ *      @param length = the length, in inches, of the G4 element
+
+ * */
+void cutElement(int quantity, float length) {
+    int cut_length = (int)INCH * length;
+
+    for (int i = 0; i < quantity; ++i) {
+        stepper.moveTo(-cut_length);
+        while (stepper.currentPosition() != -cut_length) // Full speed
+            stepper.run();
+        stepper.stop(); // stop as fast as possible: sets new target
+        delay(1000); // second wait -- blade will come down
+        stepper.setCurrentPosition(0);     }
+}
 
 void loop() {
 }
