@@ -17,7 +17,7 @@
  *      - First test:
  *          - 2653 steps = 1 inch
  *      - Second test:
- *          - 2540 steps = 1 inch --> setting is currently used
+ *          - 2540 steps = 1 inch --> this seems to be working good
  *
  */
 #include <AccelStepper.h>
@@ -25,13 +25,15 @@
 
 #define low_limit 11
 #define inch_limit 12
+#define STEP_PIN 9
+#define DIR_PIN 10
 
 
 // macros for step indexingg
 #define INCH 2540
 
 
-AccelStepper stepper(AccelStepper::DRIVER, 9, 10);
+AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
 int increment = -1;
@@ -45,10 +47,7 @@ void setup() {
     stepper.setMaxSpeed(1000);
     stepper.setSpeed(1000);
     stepper.setAcceleration(1000);
-    homeMotor();
-    delay(1000);
-    moveOneInch();
-    //cutElement(4, .25);
+    cutElement(1, .04); // testing a 1mm move, which is .04 inches  
     //homeMotor();
 }
 
@@ -105,18 +104,15 @@ void homeMotor() {
 
 /* Move the table in a series of 1 inch moves */
 void moveOneInch() {
-    // only 2 groups
-    for (int i = 0; i < 2; ++i) {
-        // testing precision movement
-        stepper.moveTo(-INCH);
-        while (stepper.currentPosition() != -INCH) // Full speed
-            stepper.run();
-        stepper.stop(); // stop as fast as possible: sets new target
-        delay(1000); // second wait -- blade will come down
-        stepper.setCurrentPosition(0);  // reset the position and move on to another part
-    }
-
+    // testing precision movement
+    stepper.moveTo(-INCH);
+    while (stepper.currentPosition() != -INCH) // Full speed
+        stepper.run();
+    stepper.stop(); // stop as fast as possible: sets new target
+    delay(1000); // second wait -- blade will come down
+    stepper.setCurrentPosition(0);  // reset the position and move on to another part
 }
+
 
 /* Used to calculate steps per inch */
 void calcInchMove() {
@@ -136,20 +132,27 @@ void calcInchMove() {
 
 /*
  * Cut the elements
+ *
  *      @param quantity = number of elements to cut
  *      @param length = the length, in inches, of the G4 element
-
- * */
+ *
+ *
+ */
 void cutElement(int quantity, float length) {
     int cut_length = (int)INCH * length;
 
     for (int i = 0; i < quantity; ++i) {
+        // debug
+        Serial.print("The amount of steps is : ");
+        Serial.print(cut_length);
+        Serial.println("");
         stepper.moveTo(-cut_length);
         while (stepper.currentPosition() != -cut_length) // Full speed
             stepper.run();
         stepper.stop(); // stop as fast as possible: sets new target
         delay(1000); // second wait -- blade will come down
-        stepper.setCurrentPosition(0);     }
+        stepper.setCurrentPosition(0);
+    }
 }
 
 void loop() {
