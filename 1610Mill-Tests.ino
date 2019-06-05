@@ -32,14 +32,16 @@
 
 
 // Pin defines
+#define inc_btn 8
 #define STEP_PIN 9
 #define DIR_PIN 10
 #define low_limit 11
 #define inch_limit 12
+#define motor_relay 13
 
 
 // Macros for step indexing
-#define MM 800  // 50 * 16 --> motor is on 1/16 step
+#define MM 200  // 50 * 4 --> motor is on 1/4 step
 
 
 // Setup a new instance of AccelStepper
@@ -50,13 +52,37 @@ void setup() {
     Serial.begin(9600);
     pinMode(low_limit, INPUT_PULLUP);
     pinMode(inch_limit, INPUT_PULLUP);
-    // lower speed to use with smallMove()
+    pinMode(inc_btn, INPUT_PULLUP);
+    pinMode(motor_relay, INPUT_PULLUP);
     stepper.setMaxSpeed(1000);
     stepper.setSpeed(1000);
     stepper.setAcceleration(1000);
+
+    // CTF Cutting sequence
     homeMotor();
-    //cutElement(1, 4);  // 4mm move, measuring with calipers
-    //homeMotor();
+    makeReferenceCut();
+    cutElement(5, 8);  // 1mm move, measuring with calipers
+    homeMotor();
+}
+
+
+/* Make the reference cut on the cutting board. This aligns the tape with blade, ensuring straight cuts */
+void makeReferenceCut() {
+    int increment = 1;
+
+    // only move when the motor is not active
+    while (digitalRead(motor_relay)) {
+        while (digitalRead(inc_btn) != HIGH) {
+            stepper.moveTo(increment);
+            increment++;  // decrease by 1 for next move if needed
+            stepper.setSpeed(1500);
+            stepper.runSpeedToPosition(); // run the motor CCW towards the switch
+        }
+        stepper.setCurrentPosition(0);
+    }
+    stepper.setCurrentPosition(0);
+    Serial.println("Cutting G4!");
+    delay(2000);
 }
 
 
@@ -67,7 +93,7 @@ void homeMotor() {
     while (digitalRead(low_limit)) {
         stepper.moveTo(homing);
         homing--;  // decrease by 1 for next move if needed
-        stepper.setSpeed(5000);
+        stepper.setSpeed(1500);
         stepper.runSpeedToPosition(); // run the motor CCW towards the switch
     }
     stepper.setCurrentPosition(0);
