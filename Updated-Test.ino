@@ -6,17 +6,6 @@
  * Author: John Glatts
  * Date: 5/22/19
  *
- * Working sketch to go back home after 3 'parts' have been cut
- * POS DIR = Towards Motor
- * NEG DIR = Away from Motor
- *
- * Need to calc. steps per inch
- *  Current test
- *      - First test:
- *          - 2653 steps = 1 inch
- *      - Second test:
- *          - 2540 steps = 1 inch --> this seems to be working good
- *
  * 6/3/19 New Setup
  *  - Use MM instead of inches
  *  - Half to be careful when selecting new steps/rev speed, i.e half-step
@@ -27,13 +16,14 @@
  *  - The best results come from 1/16th stepping. The stepper moves slower,
  *    but is able to reach the target more accurately
  *
- *  - Add an emergency function for the stop btn
+ *  - Refactor the emergency stop logic sequences
  *
  */
 #include <AccelStepper.h>
 
 
 // Pin defines
+#define ENA_PIN 6
 #define STOP_btn 7
 #define inc_btn 8
 #define STEP_PIN 9
@@ -58,6 +48,8 @@ void setup() {
     pinMode(inc_btn, INPUT_PULLUP);
     pinMode(motor_relay, INPUT_PULLUP);
     pinMode(STOP_btn, INPUT_PULLUP);
+    pinMode(ENA_PIN, OUTPUT);
+    digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is disabled
 
     // Stepper specs
     stepper.setMaxSpeed(1000);
@@ -77,6 +69,7 @@ void makeReferenceCut() {
     int increment = 1;
 
     // only move when the motor is not active
+    // this shouldn't need a e-stop becuase the user is controlling how far to move the motor
     while (digitalRead(motor_relay)) {
         while (digitalRead(inc_btn) != HIGH) {
             //Serial.println(increment); figure out where to put this --> causing a serious step delay
@@ -98,7 +91,7 @@ void homeMotor() {
     int homing = -1;
     bool is_home;
 
-    // working check for emergency stop -- add something after to move the table a bit away
+    // working check for emergency stop -- clean this up
     while (digitalRead(low_limit)) {
         if (digitalRead(STOP_btn) != HIGH) {
             stepper.stop();
@@ -173,15 +166,21 @@ void calcMove() {
 void cutElement(int quantity, float length) {
     int cut_length = (int)MM * length;
 
-    // add an emergency stop here
+    // emergency stop is working -- but clean this up
     for (int i = 0; i < quantity; ++i) {
-        // debug
         Serial.print("The amount of steps is : ");
         Serial.print(cut_length);
         Serial.println("");
         stepper.moveTo(cut_length);
         while (stepper.currentPosition() != cut_length) // Full speed
-            stepper.run();
+             if (digitalRead(STOP_btn) != HIGH) {
+                  stepper.stop(); // stop as fast as possible: sets new target
+                  Serial.println("Stopping the Cutting Sequence");
+                  digitalWrite(ENA_PIN, LOW); // disable the motor
+                  break;
+             } else {
+                  stepper.run();
+             }
         stepper.stop(); // stop as fast as possible: sets new target
         delay(1000); // wait for one second -- blade will come down
         stepper.setCurrentPosition(0);
