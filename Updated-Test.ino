@@ -49,7 +49,7 @@ void setup() {
     pinMode(motor_relay, INPUT_PULLUP);
     pinMode(STOP_btn, INPUT_PULLUP);
     pinMode(ENA_PIN, OUTPUT);
-    digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is disabled
+    digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is not enabled
 
     // Stepper specs
     stepper.setMaxSpeed(1000);
@@ -59,7 +59,7 @@ void setup() {
     // CTF Cutting sequence
     homeMotor();
     makeReferenceCut();
-    cutElement(4, 8);  // 8mm move, measuring with calipers
+    cutElement(1, 15);  // 8mm move, measuring with calipers
     homeMotor();
 }
 
@@ -69,16 +69,16 @@ void makeReferenceCut() {
     int increment = 1;
 
     // only move when the motor is not active
-    // this shouldn't need a e-stop becuase the user is controlling how far to move the motor
+    // this shouldn't need a e-stop because the user is controlling how far to move the motor
     while (digitalRead(motor_relay)) {
         while (digitalRead(inc_btn) != HIGH) {
-            //Serial.println(increment); figure out where to put this --> causing a serious step delay
             stepper.moveTo(increment);
+            // if the 'increment' value gets too high,
+            // the motor will start turning the other direction
             increment++;  // decrease by 1 for next move if needed
             stepper.setSpeed(2000);
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
         }
-        stepper.setCurrentPosition(0);
     }
     stepper.setCurrentPosition(0);
     Serial.println("Cutting G4!");
@@ -101,7 +101,7 @@ void homeMotor() {
             // seek the home limit switch
             stepper.moveTo(homing);
             homing--;  // decrease by 1 for next move if needed
-            stepper.setSpeed(1000);
+            stepper.setSpeed(1500);
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
             is_home = true;
         }
@@ -173,14 +173,14 @@ void cutElement(int quantity, float length) {
         Serial.println("");
         stepper.moveTo(cut_length);
         while (stepper.currentPosition() != cut_length) // Full speed
-             if (digitalRead(STOP_btn) != HIGH) {
-                  stepper.stop(); // stop as fast as possible: sets new target
-                  Serial.println("Stopping the Cutting Sequence");
-                  digitalWrite(ENA_PIN, LOW); // disable the motor
-                  break;
-             } else {
-                  stepper.run();
-             }
+            if (digitalRead(STOP_btn) != HIGH) {
+                stepper.stop(); // stop as fast as possible: sets new target
+                Serial.println("Stopping the Cutting Sequence");
+                digitalWrite(ENA_PIN, LOW); // disable the motor
+                break;
+            } else {
+                stepper.run();
+            }
         stepper.stop(); // stop as fast as possible: sets new target
         delay(1000); // wait for one second -- blade will come down
         stepper.setCurrentPosition(0);
