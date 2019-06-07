@@ -44,6 +44,10 @@
 AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
+// global var that will hold the number of traces from GUI
+int cut_size;
+
+
 void setup() {
     Serial.begin(9600);
     pinMode(low_limit, INPUT_PULLUP);
@@ -76,19 +80,33 @@ void setup() {
 void checkSerial() {
     if (Serial.available() > 0) {  //id data is available to read
 
-        char val = Serial.read();
+        int val = Serial.read();
 
-        if(val == 'a'){
-            homeMotor();
-        }
-        else if (val == 'b') {
-            makeReferenceCut();
-        }
-        else if (val == 'c') {
-            cutElement(3, 8);
-        }
-        else {
-            digitalWrite(buzzer, LOW);
+        if (val < 100) {
+            // Number of traces has been sent via serial
+            cut_size = (val + 1) / 2;
+        } else {
+            // A button has been pressed
+            switch (val) {
+                case 100:
+                    digitalWrite(ENA_PIN, HIGH);
+                    homeMotor();
+                    break;
+                case 101:
+                    digitalWrite(ENA_PIN, HIGH);
+                    makeReferenceCut();
+                    break;
+                case 102:
+                    digitalWrite(ENA_PIN, HIGH);
+                    cutElement(1, cut_size);
+                    break;
+                case 103:
+                    digitalWrite(ENA_PIN, LOW);
+                    break;
+                case 104:
+                    digitalWrite(ENA_PIN, HIGH);
+                    break;
+            }
         }
     }
 }
@@ -196,7 +214,7 @@ void calcMove() {
  *
  *
  */
-void cutElement(int quantity, float length) {
+void cutElement(int quantity, int length) {
     int cut_length = (int)MM * length;
 
     // emergency stop is working -- but clean this up
