@@ -15,7 +15,7 @@ void setup(){ //same as arduino program
 
     printArray(Serial.list());   //prints all available serial ports
 
-    port = new Serial(this, "COM3", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
+    port = new Serial(this, "COM6", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
 
     //lets add buton to empty window
 
@@ -25,27 +25,69 @@ void setup(){ //same as arduino program
     
     cp5.addButton("Home")     //"red" is the name of button
             .setPosition(100, 100)  //x and y coordinates of upper left corner of button
-            .setSize(130, 70)      //(width, height)
+            .setSize(185, 70)      //(width, height)
             .setFont(font)
             ;
 
     cp5.addButton("Reference")     //"red" is the name of button
             .setPosition(100, 200)  //x and y coordinates of upper left corner of button
-            .setSize(130, 70)      //(width, height)
+            .setSize(185, 70)      //(width, height)
             .setFont(font)
             ;
 
-    cp5.addButton("CutElement")     //"red" is the name of button
+    cp5.addButton("Cut_Element")     //"red" is the name of button
             .setPosition(100, 300)  //x and y coordinates of upper left corner of button
-            .setSize(130, 70)      //(width, height)
+            .setSize(185, 70)      //(width, height)
             .setFont(font)
             ;
 
-    cp5.addButton("Off")     //"yellow" is the name of button
+    cp5.addButton("Disable_Motor")     //"yellow" is the name of button
             .setPosition(100, 400)  //x and y coordinates of upper left corner of button
-            .setSize(130, 70)      //(width, height)
+            .setSize(185, 70)      //(width, height)
             .setFont(font)
             ;
+            
+    cp5.addButton("Enable_Motor")     //"yellow" is the name of button
+            .setPosition(100, 500)  //x and y coordinates of upper left corner of button
+            .setSize(185, 70)      //(width, height)
+            .setFont(font)
+            ;
+            
+   // text field stuff
+    cp5.addTextlabel("label")
+       .setText("Enter Element Info")
+       .setPosition(450,100)
+       .setFont(createFont("Georgia",35))
+      ;
+     
+  cp5.addTextfield("Pitch")
+     .setPosition(500,170)
+     .setSize(200,40)
+     .setFont(font)
+     .setFocus(true)
+     .setColor(color(255,0,0))
+     ;
+                 
+  cp5.addTextfield("Traces")
+     .setPosition(500,270)
+     .setSize(200,40)
+     .setFont(createFont("arial",20))
+     .setAutoClear(false)
+     ;
+
+  cp5.addTextfield("Quantity")
+     .setPosition(500,370)
+     .setSize(200,40)
+     .setFont(createFont("arial",20))
+     .setAutoClear(false)
+     ;
+     
+  cp5.addButton("Send_Traces")
+     .setPosition(710,270)
+     .setSize(170,30)
+     .setFont(font)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;     
 }
 
 
@@ -55,7 +97,7 @@ void draw(){  //same as loop in arduino
 
     //lets give title to our window
     fill(198, 37, 75);               //text color (r, g, b)
-    textFont(title_font);
+    textFont(title_font);  
     text("CTF Element Cutter", 80, 60);  // ("text", x coordinate, y coordinat)
 }
 
@@ -63,19 +105,35 @@ void draw(){  //same as loop in arduino
 //so whe you press any button, it sends perticular char over serial port
 
 void Home(){
-    port.write('a');
+    // when sending values that are not traces --> use 100+ because we will never have that many traces
+    // then have a check for values >= 100
+    port.write(100);
 }
 
 
 void Reference() {
-    port.write('b');
+    port.write(101);
 }
 
-void CutElement() {
-    port.write('c');
+void Cut_Element() {
+    port.write(102);
 }
 
 
-void Off(){
-    port.write('d');
+void Disable_Motor(){
+    port.write(103);
+}
+
+void Enable_Motor(){
+    port.write(104);
+}
+
+// change this to send_traces
+void Send_Traces() {
+  // automatically receives results from controller input
+  // this will be the traces field
+  //println("a textfield event for controller 'input' : "+theText);
+  // this is working --> but send a number
+  Integer traces = Integer.parseInt(cp5.get(Textfield.class,"Traces").getText());
+  port.write(traces);
 }
