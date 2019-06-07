@@ -19,6 +19,9 @@
  *  - Refactor the emergency stop logic sequences
  *
  *  - Get some sort of GUI working --> wait for camera then add a raspberry pi
+ *      - Arudino GUI seems to be working fine
+ *
+ *  - Seems that the best e-stop will be resetting the Arduino itself
  *
  */
 #include <AccelStepper.h>
@@ -36,7 +39,7 @@
 #define motor_relay 13
 
 
-// Macros for step indexing
+// Macro for step indexing
 #define MM 200  // 50 * 4 --> motor is on 1/4 step
 
 
@@ -76,7 +79,7 @@ void setup() {
 }
 
 
-/* Testing the GUI -- sends commands but does not execute them */
+/* Testing the GUI  */
 void checkSerial() {
     if (Serial.available() > 0) {  //id data is available to read
 
@@ -88,23 +91,27 @@ void checkSerial() {
         } else {
             // A button has been pressed
             switch (val) {
-                case 100:
+                case 100:   // home motor
                     digitalWrite(ENA_PIN, HIGH);
                     homeMotor();
                     break;
-                case 101:
+                case 101:   // reference cut --> move the board then hit blade down for ref. cut
                     digitalWrite(ENA_PIN, HIGH);
                     makeReferenceCut();
                     break;
-                case 102:
+                case 102:   // cut elements, only cuts 1, and uses the # of traces from GUI
                     digitalWrite(ENA_PIN, HIGH);
                     cutElement(1, cut_size);
                     break;
-                case 103:
+                case 103:   // disable the motor
                     digitalWrite(ENA_PIN, LOW);
                     break;
-                case 104:
+                case 104:   // enable the motor
                     digitalWrite(ENA_PIN, HIGH);
+                    break;
+                case 105:   // move one millimeter
+                    digitalWrite(ENA_PIN, HIGH);
+                    moveOneMM();
                     break;
             }
         }
@@ -184,7 +191,6 @@ void moveOneMM() {
     while (stepper.currentPosition() != MM) // Full speed
         stepper.run();
     stepper.stop(); // stop as fast as possible: sets new target
-    delay(1000); // second wait -- blade will come down
     stepper.setCurrentPosition(0);  // reset the position and move on to another part
 }
 
