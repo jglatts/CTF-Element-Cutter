@@ -25,31 +25,37 @@ void setup(){ //same as arduino program
     
     cp5.addButton("Home")     //"red" is the name of button
             .setPosition(100, 100)  //x and y coordinates of upper left corner of button
-            .setSize(185, 70)      //(width, height)
+            .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
 
     cp5.addButton("Reference")     //"red" is the name of button
             .setPosition(100, 200)  //x and y coordinates of upper left corner of button
-            .setSize(185, 70)      //(width, height)
+            .setSize(245, 70)      //(width, height)
+            .setFont(font)
+            ;
+    
+    cp5.addButton("Move_One_MilliMeter")     //"red" is the name of button
+            .setPosition(100, 300)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
 
     cp5.addButton("Cut_Element")     //"red" is the name of button
-            .setPosition(100, 300)  //x and y coordinates of upper left corner of button
-            .setSize(185, 70)      //(width, height)
+            .setPosition(100, 400)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
 
     cp5.addButton("Disable_Motor")     //"yellow" is the name of button
-            .setPosition(100, 400)  //x and y coordinates of upper left corner of button
-            .setSize(185, 70)      //(width, height)
+            .setPosition(100, 500)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
             
     cp5.addButton("Enable_Motor")     //"yellow" is the name of button
-            .setPosition(100, 500)  //x and y coordinates of upper left corner of button
-            .setSize(185, 70)      //(width, height)
+            .setPosition(100, 600)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
             
@@ -61,10 +67,10 @@ void setup(){ //same as arduino program
       ;
      
   cp5.addTextfield("Pitch")
+     .setText("0.5") 
      .setPosition(500,170)
      .setSize(200,40)
      .setFont(font)
-     .setFocus(true)
      .setColor(color(255,0,0))
      ;
                  
@@ -72,10 +78,12 @@ void setup(){ //same as arduino program
      .setPosition(500,270)
      .setSize(200,40)
      .setFont(createFont("arial",20))
+     .setFocus(true)
      .setAutoClear(false)
      ;
 
   cp5.addTextfield("Quantity")
+     .setText("1")
      .setPosition(500,370)
      .setSize(200,40)
      .setFont(createFont("arial",20))
@@ -127,6 +135,11 @@ void Disable_Motor(){
 void Enable_Motor(){
     port.write(104);
 }
+
+void Move_One_MilliMeter() {
+    port.write(105);
+}
+
 
 // change this to send_traces
 void Send_Traces() {
