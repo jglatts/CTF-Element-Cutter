@@ -138,7 +138,7 @@ void makeReferenceCut(int increment) {
             stepper.moveTo(increment);
             // if the 'increment' value gets too high,
             // the motor will start turning the other direction
-            (increment > 0) ? increment++: increment--;  // decrease by 1 for next move if needed
+            (increment > 0) ? increment++ : increment--;  // decrease by 1 for next move if needed
             stepper.setSpeed(2000);
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
         }
