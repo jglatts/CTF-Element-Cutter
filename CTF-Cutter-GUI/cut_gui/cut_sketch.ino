@@ -39,7 +39,7 @@
 #define motor_relay 13
 
 
-// Macro for step indexing
+// Macros for step indexing
 #define MM 200  // 50 * 4 --> motor is on 1/4 step
 
 
@@ -48,7 +48,8 @@ AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
 // global var that will hold the number of traces from GUI
-int cut_size;
+int g4_cut_size;
+int g4_cut_quantity
 
 
 void setup() {
@@ -85,9 +86,11 @@ void checkSerial() {
 
         int val = Serial.read();
 
-        if (val < 100) {
-            // Number of traces has been sent via serial
-            cut_size = (val + 1) / 2;
+        // when val < 100 we have been sent the number of traces
+        // when val is > 1000 we have been sent the quantity
+        // when the quantity value comes in, just use the % operator to get the true quantity
+        if (val < 100 || val > 1000) {
+            val < 100 ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 1000;
         } else {
             // A button has been pressed
             switch (val) {
@@ -99,9 +102,9 @@ void checkSerial() {
                     digitalWrite(ENA_PIN, HIGH);
                     makeReferenceCut();
                     break;
-                case 102:   // cut elements, only cuts 1, and uses the # of traces from GUI
+                case 102:   // cut elements
                     digitalWrite(ENA_PIN, HIGH);
-                    cutElement(1, cut_size);
+                    cutElement(g4_cut_quantity, g4_cut_size);
                     break;
                 case 103:   // disable the motor
                     digitalWrite(ENA_PIN, LOW);
@@ -109,7 +112,7 @@ void checkSerial() {
                 case 104:   // enable the motor
                     digitalWrite(ENA_PIN, HIGH);
                     break;
-                case 105:   // move one millimeter
+                case 105:   // move on millimeter
                     digitalWrite(ENA_PIN, HIGH);
                     moveOneMM();
                     break;
