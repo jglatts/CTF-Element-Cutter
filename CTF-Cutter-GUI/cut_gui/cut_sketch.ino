@@ -49,7 +49,7 @@ AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 // global var that will hold the number of traces from GUI
 int g4_cut_size;
-int g4_cut_quantity
+int g4_cut_quantity;
 
 
 void setup() {
