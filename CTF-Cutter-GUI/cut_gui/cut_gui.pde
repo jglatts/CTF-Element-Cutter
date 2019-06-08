@@ -15,7 +15,7 @@ void setup(){ //same as arduino program
 
     printArray(Serial.list());   //prints all available serial ports
 
-    port = new Serial(this, "COM3", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
+    port = new Serial(this, "COM6", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
 
     //lets add buton to empty window
 
@@ -85,7 +85,6 @@ void setup(){ //same as arduino program
      ;
 
   cp5.addTextfield("Quantity")
-     .setText("1")
      .setPosition(500,370)
      .setSize(200,40)
      .setFont(createFont("arial",20))
@@ -165,6 +164,6 @@ void Send_Quantity() {
   // this will be the traces field
   //println("a textfield event for controller 'input' : "+theText);
   Integer qty = Integer.parseInt(cp5.get(Textfield.class,"Quantity").getText());
-  qty += 1000;  // used to keep the traces and quantity seperate
-  port.write(qty);
+  Integer n_qty = qty + 200;  // used to keep the traces and quantity seperate
+  port.write(n_qty);
 }
