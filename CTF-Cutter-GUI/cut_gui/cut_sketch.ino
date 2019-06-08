@@ -89,8 +89,8 @@ void checkSerial() {
         // when val < 100 we have been sent the number of traces
         // when val is > 1000 we have been sent the quantity
         // when the quantity value comes in, just use the % operator to get the true quantity
-        if (val < 100 || val > 1000) {
-            val < 100 ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 1000;
+        if ( (val < 100) || (val > 200) ) {
+            (val < 100) ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 200;
         } else {
             // A button has been pressed
             switch (val) {
