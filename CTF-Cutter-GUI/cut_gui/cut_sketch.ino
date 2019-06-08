@@ -87,7 +87,7 @@ void checkSerial() {
         int val = Serial.read();
 
         // when val < 100 we have been sent the number of traces
-        // when val is > 1000 we have been sent the quantity
+        // when val is > 200 we have been sent the quantity
         // when the quantity value comes in, just use the % operator to get the true quantity
         if ( (val < 100) || (val > 200) ) {
             (val < 100) ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 200;
@@ -100,7 +100,7 @@ void checkSerial() {
                     break;
                 case 101:   // reference cut --> move the board then hit blade down for ref. cut
                     digitalWrite(ENA_PIN, HIGH);
-                    makeReferenceCut();
+                    makeReferenceCut(1);
                     break;
                 case 102:   // cut elements
                     digitalWrite(ENA_PIN, HIGH);
@@ -116,6 +116,12 @@ void checkSerial() {
                     digitalWrite(ENA_PIN, HIGH);
                     moveOneMM();
                     break;
+                case 106:   // move motor back to home --> controlled by index btn
+                    digitalWrite(ENA_PIN, HIGH);
+                    makeReferenceCut(-1);
+                    break;
+                default:
+                    break;
             }
         }
     }
@@ -123,8 +129,7 @@ void checkSerial() {
 
 
 /* Make the reference cut on the cutting board. This aligns the tape with blade, ensuring straight cuts */
-void makeReferenceCut() {
-    int increment = 1;
+void makeReferenceCut(int increment) {
 
     // only move when the motor is not active
     // this shouldn't need a e-stop because the user is controlling how far to move the motor
@@ -133,7 +138,7 @@ void makeReferenceCut() {
             stepper.moveTo(increment);
             // if the 'increment' value gets too high,
             // the motor will start turning the other direction
-            increment++;  // decrease by 1 for next move if needed
+            (increment > 0) ? increment++: increment--;  // decrease by 1 for next move if needed
             stepper.setSpeed(2000);
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
         }
