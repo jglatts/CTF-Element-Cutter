@@ -15,7 +15,7 @@ void setup(){ //same as arduino program
 
     printArray(Serial.list());   //prints all available serial ports
 
-    port = new Serial(this, "COM6", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
+    port = new Serial(this, "COM3", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
 
     //lets add buton to empty window
 
@@ -23,6 +23,8 @@ void setup(){ //same as arduino program
     font = createFont("calibri light bold", 20);    // custom fonts for buttons and title
     title_font = createFont("calibri light bold", 65);
     
+    
+    // Buttons are working -> but need to figure out how to add some spaces in between
     cp5.addButton("Home")     //"red" is the name of button
             .setPosition(100, 100)  //x and y coordinates of upper left corner of button
             .setSize(245, 70)      //(width, height)
@@ -67,7 +69,7 @@ void setup(){ //same as arduino program
       ;
      
   cp5.addTextfield("Pitch")
-     .setText("0.5") 
+     .setText("0.5 mm") 
      .setPosition(500,170)
      .setSize(200,40)
      .setFont(font)
@@ -95,7 +97,14 @@ void setup(){ //same as arduino program
      .setSize(170,30)
      .setFont(font)
      .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
-     ;     
+     ; 
+     
+  cp5.addButton("Send_Quantity")
+     .setPosition(710,370)
+     .setSize(170,30)
+     .setFont(font)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;      
 }
 
 
@@ -111,7 +120,6 @@ void draw(){  //same as loop in arduino
 
 //lets add some functions to our buttons
 //so whe you press any button, it sends perticular char over serial port
-
 void Home(){
     // when sending values that are not traces --> use 100+ because we will never have that many traces
     // then have a check for values >= 100
@@ -146,7 +154,17 @@ void Send_Traces() {
   // automatically receives results from controller input
   // this will be the traces field
   //println("a textfield event for controller 'input' : "+theText);
-  // this is working --> but send a number
   Integer traces = Integer.parseInt(cp5.get(Textfield.class,"Traces").getText());
   port.write(traces);
+}
+
+
+// change this to send_traces
+void Send_Quantity() {
+  // automatically receives results from controller input
+  // this will be the traces field
+  //println("a textfield event for controller 'input' : "+theText);
+  Integer qty = Integer.parseInt(cp5.get(Textfield.class,"Quantity").getText());
+  qty += 1000;  // used to keep the traces and quantity seperate
+  port.write(qty);
 }
