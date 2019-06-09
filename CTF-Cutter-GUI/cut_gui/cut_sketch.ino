@@ -23,12 +23,18 @@
  *
  *  - Seems that the best e-stop will be resetting the Arduino itself
  *
+ *  !!!!!!!!!!!!!!!!!!!!!!!!!!  *  !!!!!!!!!!!!!!!!!!!!!!!!!!
+ *  - Change the element sizes to floats
+ *  !!!!!!!!!!!!!!!!!!!!!!!!!!  *  !!!!!!!!!!!!!!!!!!!!!!!!!!
+ *
  */
 #include <AccelStepper.h>
 
 
 // Pin defines
-#define buzzer 5
+// the board is a mega2560
+#define RELAY_1 4
+#define RELAY_2 5
 #define ENA_PIN 6
 #define STOP_btn 7
 #define inc_btn 8
@@ -61,8 +67,10 @@ void setup() {
     pinMode(STOP_btn, INPUT_PULLUP);
     pinMode(buzzer, OUTPUT);
     pinMode(ENA_PIN, OUTPUT);
+    pinMode(RELAY_1, OUTPUT);
+    pinMode(RELAY_2, OUTPUT);
     digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is not enabled
-    digitalWrite(buzzer, LOW);
+    //digitalWrite(buzzer, LOW);
 
     // Stepper specs
     stepper.setMaxSpeed(1000);
@@ -95,15 +103,12 @@ void checkSerial() {
             // A button has been pressed
             switch (val) {
                 case 100:   // home motor
-                    digitalWrite(ENA_PIN, HIGH);
                     homeMotor();
                     break;
                 case 101:   // reference cut --> move the board then hit blade down for ref. cut
-                    digitalWrite(ENA_PIN, HIGH);
                     makeReferenceCut(1);
                     break;
                 case 102:   // cut elements
-                    digitalWrite(ENA_PIN, HIGH);
                     cutElement(g4_cut_quantity, g4_cut_size);
                     break;
                 case 103:   // disable the motor
@@ -113,18 +118,49 @@ void checkSerial() {
                     digitalWrite(ENA_PIN, HIGH);
                     break;
                 case 105:   // move on millimeter
-                    digitalWrite(ENA_PIN, HIGH);
                     moveOneMM();
                     break;
                 case 106:   // move motor back to home --> controlled by index btn
-                    digitalWrite(ENA_PIN, HIGH);
                     makeReferenceCut(-1);
+                    break;
+                case 107:   // move the actuator down, then back up
+                    bladeDown();
+                    break;
+                case 108:   // move the actuator up
+                    bladeUp();
                     break;
                 default:
                     break;
             }
         }
     }
+}
+
+
+/* Move the actuator down */
+void bladeDown() {
+    digitalWrite(RELAY_1, HIGH);
+    digitalWrite(RELAY_2, LOW);
+    delay(1000);
+    stopActuator(); // stop the actuator
+    delay(2000);
+    bladeUp();      // come back up
+}
+
+
+/* Move the actuator up */
+void bladeUp() {
+    digitalWrite(RELAY_1, LOW);
+    digitalWrite(RELAY_2, HIGH);
+    delay(1000);
+    stopActuator();
+}
+
+
+/* Stop all movement off the actuator */
+void stopActuator() {
+    digitalWrite(RELAY_1, LOW);
+    digitalWrite(RELAY_2, LOW);
 }
 
 
