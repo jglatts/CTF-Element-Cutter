@@ -9,19 +9,20 @@ ControlP5 cp5; //create ControlP5 object
 PFont font;
 PFont title_font;
 
+
 void setup(){ //same as arduino program
 
     size(1700, 700);    //window size, (width, height)
 
     printArray(Serial.list());   //prints all available serial ports
 
-    port = new Serial(this, "COM6", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
+    port = new Serial(this, "COM3", 9600);  //i have connected arduino to com3, it would be different in linux and mac os
 
     //lets add buton to empty window
 
     cp5 = new ControlP5(this);
     font = createFont("calibri light bold", 20);    // custom fonts for buttons and title
-    title_font = createFont("calibri light bold", 65);
+    title_font = createFont("calibri light bold", 45);
     
     
     // Buttons are working -> but need to figure out how to add some spaces in between
@@ -42,6 +43,7 @@ void setup(){ //same as arduino program
             .setSize(245, 70)      //(width, height)
             .setFont(font)
             ;
+                        
 
     cp5.addButton("Cut_Element")     //"red" is the name of button
             .setPosition(100, 400)  //x and y coordinates of upper left corner of button
@@ -49,6 +51,24 @@ void setup(){ //same as arduino program
             .setFont(font)
             ;
 
+    cp5.addButton("Blade_Down")     //"red" is the name of button
+            .setPosition(1100, 200)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
+            .setFont(font)
+            ;
+    
+    cp5.addButton("Blade_Up")     //"red" is the name of button
+            .setPosition(1100, 350)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
+            .setFont(font)
+            ;
+            
+    cp5.addButton("Blade_Down_Hold")     //"red" is the name of button
+            .setPosition(1100, 500)  //x and y coordinates of upper left corner of button
+            .setSize(245, 70)      //(width, height)
+            .setFont(font)
+            ;            
+            
     cp5.addButton("Disable_Motor")     //"yellow" is the name of button
             .setPosition(100, 500)  //x and y coordinates of upper left corner of button
             .setSize(245, 70)      //(width, height)
@@ -62,11 +82,24 @@ void setup(){ //same as arduino program
             ;
             
    // text field stuff
-    cp5.addTextlabel("label")
+  cp5.addTextlabel("label")
        .setText("Enter Element Info")
-       .setPosition(450,100)
+       .setPosition(475, 100)
        .setFont(createFont("Georgia",35))
       ;
+      
+  cp5.addTextlabel("label_blade")
+       .setText("Blade Control")
+       .setPosition(1110,100)
+       .setFont(createFont("Georgia",35))
+      ;  
+
+  cp5.addTextlabel("label_safety")
+       .setText("( Check Camera First!! )")
+       .setColorValue(0xfff00000)  // red
+       .setPosition(1110,146)
+       .setFont(createFont("Georgia",25))
+      ;      
      
   cp5.addTextfield("Pitch")
      .setText("0.5 mm") 
@@ -104,6 +137,13 @@ void setup(){ //same as arduino program
      .setFont(font)
      .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
      ;      
+     
+    cp5.addButton("Motor_ComeBack")
+     .setPosition(500,500)
+     .setSize(215,75)
+     .setFont(font)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;    
 }
 
 
@@ -116,6 +156,7 @@ void draw(){  //same as loop in arduino
     textFont(title_font);  
     text("CTF Element Cutter", 80, 60);  // ("text", x coordinate, y coordinat)
 }
+
 
 //lets add some functions to our buttons
 //so whe you press any button, it sends perticular char over serial port
@@ -130,6 +171,7 @@ void Reference() {
     port.write(101);
 }
 
+
 void Cut_Element() {
     port.write(102);
 }
@@ -139,12 +181,29 @@ void Disable_Motor(){
     port.write(103);
 }
 
+
 void Enable_Motor(){
     port.write(104);
 }
 
+
 void Move_One_MilliMeter() {
     port.write(105);
+}
+
+
+void Motor_ComeBack() {
+    port.write(106);
+}
+
+
+void Blade_Down() {
+    port.write(107);
+}
+
+
+void Blade_Up() {
+    port.write(108);
 }
 
 
