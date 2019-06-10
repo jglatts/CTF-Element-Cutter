@@ -54,7 +54,7 @@ AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
 // global var that will hold the number of traces from GUI
-int g4_cut_size;
+float g4_cut_size;
 int g4_cut_quantity;
 
 
@@ -65,7 +65,6 @@ void setup() {
     pinMode(inc_btn, INPUT_PULLUP);
     pinMode(motor_relay, INPUT_PULLUP);
     pinMode(STOP_btn, INPUT_PULLUP);
-    pinMode(buzzer, OUTPUT);
     pinMode(ENA_PIN, OUTPUT);
     pinMode(RELAY_1, OUTPUT);
     pinMode(RELAY_2, OUTPUT);
@@ -141,9 +140,8 @@ void checkSerial() {
 void bladeDown() {
     digitalWrite(RELAY_1, HIGH);
     digitalWrite(RELAY_2, LOW);
-    delay(1000);
+    delay(500);
     stopActuator(); // stop the actuator
-    delay(2000);
     bladeUp();      // come back up
 }
 
@@ -264,8 +262,8 @@ void calcMove() {
  *
  *
  */
-void cutElement(int quantity, int length) {
-    int cut_length = (int)MM * length;
+void cutElement(int quantity, float length) {
+    float cut_length = MM * length;
 
     // emergency stop is working -- but clean this up
     for (int i = 0; i < quantity; ++i) {
