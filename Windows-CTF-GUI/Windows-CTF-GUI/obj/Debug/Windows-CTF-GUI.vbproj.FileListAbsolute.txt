@@ -1,0 +1,12 @@
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\bin\Debug\Windows-CTF-GUI.exe.config
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\bin\Debug\Windows-CTF-GUI.exe
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\bin\Debug\Windows-CTF-GUI.pdb
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\bin\Debug\Windows-CTF-GUI.xml
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.vbprojAssemblyReference.cache
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows_CTF_GUI.Form1.resources
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows_CTF_GUI.Resources.resources
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.vbproj.GenerateResource.cache
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.vbproj.CoreCompileInputs.cache
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.exe
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.xml
+C:\Users\User\source\repos\Windows-CTF-GUI\Windows-CTF-GUI\obj\Debug\Windows-CTF-GUI.pdb
