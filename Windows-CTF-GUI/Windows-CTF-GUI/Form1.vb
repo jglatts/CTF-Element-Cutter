@@ -1,4 +1,4 @@
-﻿Imports System.IO
+Imports System.IO
 Imports System.IO.Ports
 Imports System.Threading
 
@@ -95,5 +95,76 @@ Public Class Form1
         SerialPort1.Close()
 
     End Sub
+    Private Sub btnInchLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnInchLeft.Click
+        ' move one inch button
+        Dim b() As Byte = New Byte() {113}
 
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnTenthLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTenthLeft.Click
+
+        Dim b() As Byte = New Byte() {114}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnHunLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHunLeft.Click
+
+        Dim b() As Byte = New Byte() {115}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnMilLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMilLeft.Click
+
+        Dim b() As Byte = New Byte() {116}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnInchRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnInchRight.Click
+        ' move one inch button
+        Dim b() As Byte = New Byte() {109}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnTenthRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTenthRight.Click
+
+        Dim b() As Byte = New Byte() {110}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnHunRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHunRight.Click
+
+        Dim b() As Byte = New Byte() {111}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+    Private Sub btnMilRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMilRight.Click
+
+        Dim b() As Byte = New Byte() {112}
+
+        SerialPort1.Open()
+        SerialPort1.Write(b, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
 End Class
