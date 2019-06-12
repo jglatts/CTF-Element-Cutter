@@ -7,7 +7,9 @@ Actively Developed
 
 
 
-# Check out the Visual Basic GUI
+# Check out ***Windows-CUT-GUI*** 
+Updated verison of the GUI using visual basic and studio.
+Main purpose is sending serial data to conrtoller.
 
 
 
