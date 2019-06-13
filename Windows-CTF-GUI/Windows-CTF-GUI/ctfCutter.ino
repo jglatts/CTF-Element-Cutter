@@ -29,6 +29,8 @@
  *
  */
 #include <AccelStepper.h>
+
+
 // Pin defines
 // the board is a mega2560
 #define RELAY_1 4
@@ -41,13 +43,21 @@
 #define low_limit 11
 #define inch_limit 12
 #define motor_relay 13
+
+
 // Macros for step indexing
 #define MM 200  // 50 * 4 --> motor is on 1/4 step
+
+
 // Setup a new instance of AccelStepper
 AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
+
+
 // global var that will hold the number of traces from GUI
 float g4_cut_size;
 int g4_cut_quantity;
+
+
 void setup() {
     Serial.begin(9600);
     pinMode(low_limit, INPUT_PULLUP);
@@ -60,10 +70,12 @@ void setup() {
     pinMode(RELAY_2, OUTPUT);
     digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is not enabled
     //digitalWrite(buzzer, LOW);
+
     // Stepper specs
     stepper.setMaxSpeed(1000);
     stepper.setSpeed(1000);
     stepper.setAcceleration(1000);
+
     // Cutting Sequence
     /*
     homeMotor();
@@ -71,6 +83,7 @@ void setup() {
     cutElement(3, 8);
     homeMotor();
     */
+
 }
 
 
@@ -79,6 +92,7 @@ void checkSerial() {
     if (Serial.available() > 0) {  //id data is available to read
         digitalWrite(ENA_PIN, HIGH);    // make sure motor is on
         int val = Serial.read();
+
         // when val < 100 we have been sent the number of traces
         // when val is > 200 we have been sent the quantity
         // when the quantity value comes in, just use the % operator to get the true quantity
@@ -86,6 +100,8 @@ void checkSerial() {
             (val < 100) ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 200;
         } else {
             // A button has been pressed
+            // swap all the number values
+            // with symbolic constants
             switch (val) {
                 case 100:   // home motor
                     homeMotor();
@@ -180,6 +196,7 @@ void stopActuator() {
 void moveStepperTo(float length) {
     // add equation to get the mm size in steps/mm
     int n_distance = MM * length;
+
     stepper.moveTo(n_distance);
     while (stepper.currentPosition() != n_distance) // Full speed
         stepper.run();
@@ -196,11 +213,9 @@ void makeReferenceCut(int increment) {
     while (digitalRead(motor_relay)) {
         while (digitalRead(inc_btn) != HIGH) {
             stepper.moveTo(increment);
-            // if the 'increment' value gets too high,
-            // the motor will start turning the other direction
-            (increment > 0) ? increment++ : increment--;  // decrease by 1 for next move if needed
             stepper.setSpeed(2000);
-            stepper.runSpeedToPosition(); // run the motor CCW towards the switch
+            stepper.runSpeedToPosition();
+            stepper.setCurrentPosition(0);  // reset position 
         }
     }
     stepper.setCurrentPosition(0);
@@ -212,8 +227,10 @@ void makeReferenceCut(int increment) {
 void homeMotor() {
     int homing = -1;
     bool is_home;
+
     // reset position
     stepper.setCurrentPosition(0);
+
     // working check for emergency stop -- clean this up
     while (digitalRead(low_limit)) {
         if (digitalRead(STOP_btn) != HIGH) {
@@ -259,6 +276,7 @@ void calcMove() {
     // set-up a limit switch 1" away
     // count steps and then further refine
     int n_steps = 1;
+
     while (digitalRead(inch_limit))  {
         stepper.moveTo(n_steps);
         n_steps++;  // decrease by 1 for next move if needed
@@ -279,6 +297,7 @@ void calcMove() {
  */
 void cutElement(int quantity, float length) {
     float cut_length = MM * length;
+
     // emergency stop is working -- but clean this up
     for (int i = 0; i < quantity; ++i) {
         stepper.moveTo(cut_length);
@@ -291,7 +310,10 @@ void cutElement(int quantity, float length) {
                 stepper.run();
             }
         stepper.stop(); // stop as fast as possible: sets new target
-        delay(1000); // wait for one second -- blade will come down
+        // add something in the future, to manually fire the blade
+        // this method will not work the best in practice
+        bladeDown();
+        bladeUp();
         stepper.setCurrentPosition(0);
     }
 }
@@ -300,5 +322,4 @@ void cutElement(int quantity, float length) {
 void loop() {
     // testing GUI
     checkSerial();
-
 }
