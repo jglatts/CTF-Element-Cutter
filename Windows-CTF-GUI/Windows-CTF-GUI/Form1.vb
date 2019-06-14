@@ -4,8 +4,6 @@ Imports System.Threading
 
 Public Class Form1
     ' globals
-    Shared are_traces_sent As Boolean
-    Shared g_traces As Integer
     Shared SerialPort1 = New SerialPort()
     Shared distance_travelled As Decimal
     Private Shared Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
@@ -100,12 +98,10 @@ Public Class Form1
     Private Sub btnSendTraces_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSendTraces.Click
         Dim value As Integer
         value = Convert.ToInt32(txtTraces.Text)
-        g_traces = value    ' set the global
         Dim b() As Byte = New Byte() {value}
 
         btnDisableMotor.ForeColor = Color.Black
-        are_traces_sent = True  ' set the flag
-        checkWhatsBeenSent()    ' check the flags
+        checkWhatsBeenSent(value)    ' update distance info
 
         writeSerial(b)
 
@@ -229,19 +225,17 @@ Public Class Form1
         SerialPort1.Close()
 
     End Sub
-    Private Sub checkWhatsBeenSent()
+    Private Sub checkWhatsBeenSent(ByVal traces As Integer)
         ' if the number of traces has been succesfully sent
         ' update the textbox with corresponding length
         Dim cut_length As Decimal
 
-        If are_traces_sent Then
-            ' get cut length, in inches
-            cut_length = ((g_traces + 1) / 2) / 25.4
-            txtCutLength.Text = Decimal.Round(cut_length, 3)
-            lblCutLength.Visible = True
-            txtCutLength.Visible = True
-            lblCutLengthInches.Visible = True
-        End If
+        ' get cut length, in inches
+        cut_length = ((traces + 1) / 2) / 25.4
+        txtCutLength.Text = Decimal.Round(cut_length, 3)
+        lblCutLength.Visible = True
+        txtCutLength.Visible = True
+        lblCutLengthInches.Visible = True
 
     End Sub
 
