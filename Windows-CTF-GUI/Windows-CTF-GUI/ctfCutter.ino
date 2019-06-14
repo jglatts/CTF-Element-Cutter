@@ -33,6 +33,7 @@
 
 // Pin defines
 // the board is a mega2560
+#define RST 3
 #define RELAY_1 4
 #define RELAY_2 5
 #define ENA_PIN 6
@@ -46,7 +47,7 @@
 
 
 // Macros for step indexing
-#define MM 200  // 50 * 4 --> motor is on 1/4 step
+#define MM 200  // 50 * 4 --> motor is on 1/2 step
 
 
 // Setup a new instance of AccelStepper
@@ -65,11 +66,12 @@ void setup() {
     pinMode(inc_btn, INPUT_PULLUP);
     pinMode(motor_relay, INPUT_PULLUP);
     pinMode(STOP_btn, INPUT_PULLUP);
+    pinMode(RST, OUTPUT);
     pinMode(ENA_PIN, OUTPUT);
     pinMode(RELAY_1, OUTPUT);
     pinMode(RELAY_2, OUTPUT);
     digitalWrite(ENA_PIN, HIGH);  // when this goes low --> motor is not enabled
-    //digitalWrite(buzzer, LOW);
+    //digitalWrite(RST, HIGH);      // when this goes low --> arudino will be reset
 
     // Stepper specs
     stepper.setMaxSpeed(1000);
@@ -133,7 +135,7 @@ void checkSerial() {
                 case 112:   // .001 inch move
                     moveStepperTo(0.0254);
                     break;
-                // inch moves for the other direction
+                    // inch moves for the other direction
                 case 113:
                     moveStepperTo(-25.4);
                     break;
@@ -145,6 +147,9 @@ void checkSerial() {
                     break;
                 case 116:
                     moveStepperTo(-0.0254);
+                    break;
+                case 117:   // emergency stop, by resetting the arduino
+                    digitalWrite(RST, LOW);
                     break;
                 default:
                     break;
@@ -234,16 +239,15 @@ void homeMotor() {
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
         }
     }
-    // reset position
+    // reset position and move to home
     stepper.setCurrentPosition(0);
     stepper.moveTo(400);
     while (stepper.currentPosition() != 400) // Full speed
         stepper.run();
-        stepper.stop();
-        stepper.setCurrentPosition(0);
-        // reset position
-        stepper.setCurrentPosition(0);
-    }
+    stepper.stop();
+    stepper.setCurrentPosition(0);
+    // reset position
+    stepper.setCurrentPosition(0);
 }
 
 
