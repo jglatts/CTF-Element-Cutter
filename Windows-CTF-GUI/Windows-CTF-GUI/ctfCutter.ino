@@ -75,19 +75,10 @@ void setup() {
     stepper.setMaxSpeed(1000);
     stepper.setSpeed(1000);
     stepper.setAcceleration(1000);
-
-    // Cutting Sequence
-    /*
-    homeMotor();
-    makeReferenceCut();
-    cutElement(3, 8);
-    homeMotor();
-    */
-
 }
 
 
-/* Testing the GUI  */
+/* Get incoming serial commands and act accordingly  */
 void checkSerial() {
     if (Serial.available() > 0) {  //id data is available to read
         digitalWrite(ENA_PIN, HIGH);    // make sure motor is on
@@ -213,9 +204,9 @@ void makeReferenceCut(int increment) {
     while (digitalRead(motor_relay)) {
         while (digitalRead(inc_btn) != HIGH) {
             stepper.moveTo(increment);
-            stepper.setSpeed(2000);
+            stepper.setSpeed(3000);
             stepper.runSpeedToPosition();
-            stepper.setCurrentPosition(0);  // reset position 
+            stepper.setCurrentPosition(0);  // reset position
         }
     }
     stepper.setCurrentPosition(0);
@@ -226,7 +217,6 @@ void makeReferenceCut(int increment) {
 /* Home the motor, using limits, and reset the position */
 void homeMotor() {
     int homing = -1;
-    bool is_home;
 
     // reset position
     stepper.setCurrentPosition(0);
@@ -235,23 +225,20 @@ void homeMotor() {
     while (digitalRead(low_limit)) {
         if (digitalRead(STOP_btn) != HIGH) {
             stepper.stop();
-            is_home = false;
             break;
         } else {
             // seek the home limit switch
             stepper.moveTo(homing);
             homing--;  // decrease by 1 for next move if needed
-            stepper.setSpeed(1500);
+            stepper.setSpeed(2000);
             stepper.runSpeedToPosition(); // run the motor CCW towards the switch
-            is_home = true;
         }
     }
     // reset position
     stepper.setCurrentPosition(0);
-    if (is_home) {
-        stepper.moveTo(200);
-        while (stepper.currentPosition() != 200) // Full speed
-            stepper.run();
+    stepper.moveTo(400);
+    while (stepper.currentPosition() != 400) // Full speed
+        stepper.run();
         stepper.stop();
         stepper.setCurrentPosition(0);
         // reset position
