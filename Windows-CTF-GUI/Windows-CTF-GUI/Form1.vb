@@ -96,12 +96,11 @@ Public Class Form1
 
     End Sub
     Private Sub btnSendTraces_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSendTraces.Click
-        Dim value As Integer
-        value = Convert.ToInt32(txtTraces.Text)
-        Dim b() As Byte = New Byte() {value}
+        Dim value As Integer = Convert.ToInt32(txtTraces.Text)  ' grab the number of traces from the textbox and convert to int
+        Dim b() As Byte = New Byte() {value}                    ' place the number of traces in a byte array to send through serial
 
         btnDisableMotor.ForeColor = Color.Black
-        checkWhatsBeenSent(value)    ' update distance info
+        updateTraceTextBox(value)    ' update distance info
 
         writeSerial(b)
 
@@ -225,7 +224,7 @@ Public Class Form1
         SerialPort1.Close()
 
     End Sub
-    Private Sub checkWhatsBeenSent(ByVal traces As Integer)
+    Private Sub updateTraceTextBox(ByVal traces As Integer)
         ' if the number of traces has been succesfully sent
         ' update the textbox with corresponding length
         Dim cut_length As Decimal
