@@ -162,7 +162,7 @@ void checkSerial() {
 void bladeDown() {
     digitalWrite(RELAY_1, HIGH);
     digitalWrite(RELAY_2, LOW);
-    delay(1200);
+    delay(1300);
     //stopActuator(750);
     //bladeUp();      // come back up
 }
@@ -172,7 +172,7 @@ void bladeDown() {
 void bladeUp() {
     digitalWrite(RELAY_1, LOW);
     digitalWrite(RELAY_2, HIGH);
-    delay(1400);
+    delay(1500);
 }
 
 
