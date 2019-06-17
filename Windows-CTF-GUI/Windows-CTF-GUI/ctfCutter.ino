@@ -23,9 +23,8 @@
  *
  *  - Seems that the best e-stop will be resetting the Arduino itself
  *
- *  !!!!!!!!!!!!!!!!!!!!!!!!!!  *  !!!!!!!!!!!!!!!!!!!!!!!!!!
- *  - Change the element sizes to floats
- *  !!!!!!!!!!!!!!!!!!!!!!!!!!  *  !!!!!!!!!!!!!!!!!!!!!!!!!!
+ *  - Tweak the actuator algorithms
+ *      - After a few moves 'down', the actuator will not be in the same position
  *
  */
 #include <AccelStepper.h>
@@ -118,7 +117,7 @@ void checkSerial() {
                     makeReferenceCut(-1);
                     break;
                 case 107:   // move the actuator down, then back up
-                    bladeDown();
+                    bladeDownAndUp();
                     break;
                 case 108:   // move the actuator up
                     bladeUp();
@@ -163,8 +162,9 @@ void checkSerial() {
 void bladeDown() {
     digitalWrite(RELAY_1, HIGH);
     digitalWrite(RELAY_2, LOW);
-    delay(1140);
-    bladeUp();      // come back up
+    delay(1200);
+    //stopActuator(750);
+    //bladeUp();      // come back up
 }
 
 
@@ -172,8 +172,7 @@ void bladeDown() {
 void bladeUp() {
     digitalWrite(RELAY_1, LOW);
     digitalWrite(RELAY_2, HIGH);
-    delay(1500);
-    stopActuator();
+    delay(1400);
 }
 
 
@@ -181,6 +180,14 @@ void bladeUp() {
 void stopActuator() {
     digitalWrite(RELAY_1, LOW);
     digitalWrite(RELAY_2, LOW);
+}
+
+
+/* Move the actuator down, then back up */
+void bladeDownAndUp() {
+    bladeDown();
+    bladeUp();
+    stopActuator();
 }
 
 
@@ -305,6 +312,7 @@ void cutElement(int quantity, float length) {
         // this method will not work the best in practice
         bladeDown();
         bladeUp();
+        stopActuator();
         stepper.setCurrentPosition(0);
     }
 }
