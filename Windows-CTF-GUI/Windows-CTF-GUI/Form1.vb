@@ -3,9 +3,13 @@ Imports System.IO.Ports
 Imports System.Threading
 
 Public Class Form1
+
     ' globals
     Shared SerialPort1 = New SerialPort()
     Shared distance_travelled As Decimal
+    Shared g_traces As Integer
+    Shared stepper_data As Byte()
+
     Private Shared Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' set up serial port
@@ -22,8 +26,9 @@ Public Class Form1
         Form1.txtCutLength.Visible = False
         Form1.lblCutLengthInches.Visible = False
 
-
     End Sub
+
+
     Private Sub btnHome_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHome.Click
 
         Dim b() As Byte = New Byte() {100}
@@ -36,6 +41,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnMoveCW_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMoveCW.Click
 
         Dim b() As Byte = New Byte() {101}
@@ -44,7 +50,9 @@ Public Class Form1
 
         writeSerial(b)
 
+
     End Sub
+
     Private Sub btnEmergStop_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEmergStop.Click
         ' get this working right
         ' right now, the arduino is getting 'stuck' trying to keep on resetting
@@ -55,6 +63,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnCutElements_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCutElements.Click
 
         Dim b() As Byte = New Byte() {102}
@@ -64,6 +73,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnDisableMotor_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnDisableMotor.Click
 
         Dim b() As Byte = New Byte() {103}
@@ -73,6 +83,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnBladeDown_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnBladeDown.Click
 
         Dim b() As Byte = New Byte() {107}
@@ -86,6 +97,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnMoveCCW_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMoveCCW.Click
 
         Dim b() As Byte = New Byte() {106}
@@ -95,11 +107,14 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnSendTraces_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnSendTraces.Click
+
         Dim value As Integer = Convert.ToInt32(txtTraces.Text)  ' grab the number of traces from the textbox and convert to int
         Dim b() As Byte = New Byte() {value}                    ' place the number of traces in a byte array to send through serial
 
         btnDisableMotor.ForeColor = Color.Black
+        g_traces = value
         updateTraceTextBox(value)    ' update distance info
 
         writeSerial(b)
@@ -118,6 +133,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnInchLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnInchLeft.Click
         ' move one inch button
         Dim b() As Byte = New Byte() {113}
@@ -130,6 +146,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnTenthLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTenthLeft.Click
 
         Dim b() As Byte = New Byte() {114}
@@ -142,6 +159,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnHunLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHunLeft.Click
 
         Dim b() As Byte = New Byte() {115}
@@ -154,6 +172,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnMilLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMilLeft.Click
 
         Dim b() As Byte = New Byte() {116}
@@ -166,6 +185,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnInchRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnInchRight.Click
         ' move one inch button
         Dim b() As Byte = New Byte() {109}
@@ -179,6 +199,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnTenthRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnTenthRight.Click
 
         Dim b() As Byte = New Byte() {110}
@@ -191,6 +212,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnHunRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHunRight.Click
 
         Dim b() As Byte = New Byte() {111}
@@ -203,6 +225,7 @@ Public Class Form1
         writeSerial(b)
 
     End Sub
+
     Private Sub btnMilRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMilRight.Click
 
         Dim b() As Byte = New Byte() {112}
@@ -216,6 +239,48 @@ Public Class Form1
 
 
     End Sub
+
+    Private Sub btnEighthRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEighthRight.Click
+
+        Dim b() As Byte = New Byte() {119}
+
+        distance_travelled += 0.000125
+        txtDistTravel.Text = distance_travelled
+
+        btnDisableMotor.ForeColor = Color.Black
+
+        writeSerial(b)
+
+
+    End Sub
+    Private Sub btnEighthLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEighthLeft.Click
+
+        Dim b() As Byte = New Byte() {120}
+
+        distance_travelled -= 0.000125
+        txtDistTravel.Text = distance_travelled
+
+        btnDisableMotor.ForeColor = Color.Black
+
+        writeSerial(b)
+
+
+    End Sub
+
+    Private Sub btnCutMove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCutMove.Click
+        Dim cut_length As Decimal
+        Dim b() As Byte = New Byte() {118}
+
+        ' update the text box
+        ' test if this will clear what was remaining
+        cut_length = ((g_traces + 1) / 2) / 25.4
+        distance_travelled = Decimal.Round(cut_length, 3)
+        txtDistTravel.Text = Decimal.Round(cut_length, 3)
+
+        writeSerial(b)
+
+    End Sub
+
     Private Sub writeSerial(ByVal data As Byte())
         ' send commands to the controller, mega2560, through serial port
 
@@ -224,6 +289,19 @@ Public Class Form1
         SerialPort1.Close()
 
     End Sub
+
+    Private Sub readSerial(ByVal step_data As Byte())
+        ' read data from the serial port
+        ' test this badboy out
+
+        SerialPort1.Open()
+        ' may have to change from byte array to something larger
+        ' or maybe it can handle it
+        SerialPort1.Read(step_data, 0, 1)
+        SerialPort1.Close()
+
+    End Sub
+
     Private Sub updateTraceTextBox(ByVal traces As Integer)
         ' if the number of traces has been succesfully sent
         ' update the textbox with corresponding length
