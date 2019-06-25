@@ -14,17 +14,18 @@ Public Class Form1
 
         ' set up serial port
         SerialPort1.PortName = "COM6" ' check And change Arduino port
-        SerialPort1.BaudRate = 9600
+        SerialPort1.BaudRate = 9600   ' make sure Arduino serial is set at 9600 bps  
         SerialPort1.DataBits = 8
         SerialPort1.Parity = Parity.None
         SerialPort1.StopBits = StopBits.One
         SerialPort1.Handshake = Handshake.None
-        SerialPort1.Encoding = System.Text.Encoding.Default
+        SerialPort1.Encoding = System.Text.Encoding.Default ' maybe change to UTF-8, incase any strings are sent
 
         ' hide cut length stuff
         Form1.lblCutLength.Visible = False
         Form1.txtCutLength.Visible = False
         Form1.lblCutLengthInches.Visible = False
+
 
     End Sub
 
@@ -54,8 +55,7 @@ Public Class Form1
     End Sub
 
     Private Sub btnEmergStop_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEmergStop.Click
-        ' get this working right
-        ' right now, the arduino is getting 'stuck' trying to keep on resetting
+        ' the arduino is getting 'stuck' trying to keep on resetting
         Dim b() As Byte = New Byte() {117}
 
         btnDisableMotor.ForeColor = Color.Black
@@ -129,6 +129,10 @@ Public Class Form1
         Dim b() As Byte = New Byte() {value}
 
         btnDisableMotor.ForeColor = Color.Black
+
+        ' update the progress bar
+        cutElementsProgressBar.Maximum = 0  ' reset first
+        cutElementsProgressBar.Maximum = Convert.ToInt32(txtQuantity.Text)
 
         writeSerial(b)
 
@@ -240,33 +244,6 @@ Public Class Form1
 
     End Sub
 
-    Private Sub btnEighthRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEighthRight.Click
-
-        Dim b() As Byte = New Byte() {119}
-
-        distance_travelled += 0.000125
-        txtDistTravel.Text = distance_travelled
-
-        btnDisableMotor.ForeColor = Color.Black
-
-        writeSerial(b)
-
-
-    End Sub
-    Private Sub btnEighthLeft_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEighthLeft.Click
-
-        Dim b() As Byte = New Byte() {120}
-
-        distance_travelled -= 0.000125
-        txtDistTravel.Text = distance_travelled
-
-        btnDisableMotor.ForeColor = Color.Black
-
-        writeSerial(b)
-
-
-    End Sub
-
     Private Sub btnCutMove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCutMove.Click
         Dim cut_length As Decimal
         Dim b() As Byte = New Byte() {118}
@@ -276,6 +253,11 @@ Public Class Form1
         cut_length = ((g_traces + 1) / 2) / 25.4
         distance_travelled = Decimal.Round(cut_length, 3)
         txtDistTravel.Text = Decimal.Round(cut_length, 3)
+
+        ' update the progess bar
+        ' figure out if this will work better when the blade down btn is clicked
+        ' also work in the quantity of elements and correspond the value with the progress bar
+        cutElementsProgressBar.Value += 1
 
         writeSerial(b)
 
