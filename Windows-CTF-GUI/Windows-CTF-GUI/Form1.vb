@@ -257,9 +257,12 @@ Public Class Form1
         ' update the progess bar
         ' figure out if this will work better when the blade down btn is clicked
         ' also work in the quantity of elements and correspond the value with the progress bar
-        cutElementsProgressBar.Value += 1
-
-        writeSerial(b)
+        If cutElementsProgressBar.Value < cutElementsProgressBar.Maximum Then
+            cutElementsProgressBar.Value += 1
+            writeSerial(b)
+        Else
+            MsgBox("All elements have been cut, please enter a new quantity")
+        End If
 
     End Sub
 
