@@ -19,7 +19,8 @@
  *  - Refactor the emergency stop logic sequences
  *
  *  - Get some sort of GUI working --> wait for camera then add a raspberry pi
- *      - Arudino GUI seems to be working fine
+ *      - Visual Basic GUI seems to be working fine
+ *      - Maybe use the pi for camera processing
  *
  *  - Seems that the best e-stop will be resetting the Arduino itself
  *
@@ -53,9 +54,17 @@
 AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
-// global var that will hold the number of traces from GUI
+// globals to hold information about the G4 element
+// used to store values sent from GUI
 float g4_cut_size;
 int g4_cut_quantity;
+
+
+// globals for the actuator
+// trying to get rid of weird timing bug
+int blade_count;
+int blade_down_delay = 2320;
+int blade_up_delay = 2520;
 
 
 void setup() {
@@ -92,8 +101,6 @@ void checkSerial() {
             (val < 100) ? g4_cut_size = (val + 1) / 2 : g4_cut_quantity = val % 200;
         } else {
             // A button has been pressed
-            // swap all the number values
-            // with symbolic constants
             switch (val) {
                 case 100:   // home motor
                     homeMotor();
@@ -120,7 +127,7 @@ void checkSerial() {
                     bladeDownAndUp();
                     break;
                 case 108:   // move the actuator up
-                    bladeUp();
+                    //bladeUp(); not used, add something useful
                     break;
                 case 109:   // one inch move
                     moveStepperTo(25.4);
@@ -150,6 +157,16 @@ void checkSerial() {
                 case 117:   // emergency stop, by resetting the arduino
                     digitalWrite(RST, LOW);
                     break;
+                case 118:   // move the table to the new part distance
+                    moveStepperTo(g4_cut_size);
+                    break;
+                case 119:   // 1/8th of a Mil move -- right
+                    // currently not working, tweak or just abandon
+                    moveStepperTo(0.003);
+                    break;
+                case 120:   // 1/8th of a Mil move -- left
+                    moveStepperTo(-0.003);
+                    break;
                 default:
                     break;
             }
@@ -158,36 +175,27 @@ void checkSerial() {
 }
 
 
-/* Move the actuator down */
-void bladeDown() {
-    digitalWrite(RELAY_1, HIGH);
-    digitalWrite(RELAY_2, LOW);
-    delay(1300);
-    //stopActuator(750);
-    //bladeUp();      // come back up
-}
-
-
-/* Move the actuator up */
-void bladeUp() {
-    digitalWrite(RELAY_1, LOW);
-    digitalWrite(RELAY_2, HIGH);
-    delay(1500);
-}
-
-
-/* Stop all movement off the actuator */
-void stopActuator() {
-    digitalWrite(RELAY_1, LOW);
-    digitalWrite(RELAY_2, LOW);
-}
-
-
 /* Move the actuator down, then back up */
 void bladeDownAndUp() {
-    bladeDown();
-    bladeUp();
-    stopActuator();
+    // this seems to be working and getting rid of weird bug
+    // send the blade down
+    digitalWrite(RELAY_1, HIGH);
+    digitalWrite(RELAY_2, LOW);
+    delay(blade_down_delay);
+
+    // stop the actuator
+    digitalWrite(RELAY_1, LOW);
+    digitalWrite(RELAY_2, LOW);
+    delay(2000);    // 2 second wait, hopefully get rid of timing bug
+
+    // back up
+    digitalWrite(RELAY_2, HIGH);
+    digitalWrite(RELAY_1, LOW);
+    delay(blade_up_delay);
+
+    // stop the actuator
+    digitalWrite(RELAY_1, LOW);
+    digitalWrite(RELAY_2, LOW);
 }
 
 
@@ -196,9 +204,9 @@ void bladeDownAndUp() {
  *      @param length = distance to travel, in MM
  *
  */
-void moveStepperTo(float length) {
-    // add equation to get the mm size in steps/mm
-    int n_distance = MM * length;
+void moveStepperTo(float c_length) {
+    int n_distance = MM * c_length;
+    //float n_distance = MM * c_length;
 
     stepper.moveTo(n_distance);
     while (stepper.currentPosition() != n_distance) // Full speed
@@ -211,12 +219,12 @@ void moveStepperTo(float length) {
 /* Make the reference cut on the cutting board. This aligns the tape with blade, ensuring straight cuts */
 void makeReferenceCut(int increment) {
 
-    // only move when the motor is not active
-    // this shouldn't need a e-stop because the user is controlling how far to move the motor
+    // motor_relay is really a button connected to RESET of MCU
+    // change the name
     while (digitalRead(motor_relay)) {
         while (digitalRead(inc_btn) != HIGH) {
             stepper.moveTo(increment);
-            stepper.setSpeed(3000);
+            stepper.setSpeed(7000);
             stepper.runSpeedToPosition();
             stepper.setCurrentPosition(0);  // reset position
         }
@@ -253,8 +261,6 @@ void homeMotor() {
         stepper.run();
     stepper.stop();
     stepper.setCurrentPosition(0);
-    // reset position
-    stepper.setCurrentPosition(0);
 }
 
 
@@ -264,22 +270,20 @@ void moveOneMM() {
     stepper.moveTo(MM);
     while (stepper.currentPosition() != MM) // Full speed
         stepper.run();
-    stepper.stop(); // stop as fast as possible: sets new target
-    stepper.setCurrentPosition(0);  // reset the position and move on to another part
+    stepper.stop();
+    stepper.setCurrentPosition(0);
 }
 
 
 /* Used to calculate steps per inch */
 void calcMove() {
-    // set-up a limit switch 1" away
-    // count steps and then further refine
     int n_steps = 1;
 
     while (digitalRead(inch_limit))  {
         stepper.moveTo(n_steps);
-        n_steps++;  // decrease by 1 for next move if needed
+        n_steps++;
         stepper.setSpeed(750);
-        stepper.runSpeedToPosition(); // run the motor CCW towards the switch
+        stepper.runSpeedToPosition();
     }
     stepper.stop();
 }
@@ -293,10 +297,9 @@ void calcMove() {
  *
  *
  */
-void cutElement(int quantity, float length) {
-    float cut_length = MM * length;
+void cutElement(int quantity, float c_length) {
+    float cut_length = MM * c_length;
 
-    // emergency stop is working -- but clean this up
     for (int i = 0; i < quantity; ++i) {
         stepper.moveTo(cut_length);
         while (stepper.currentPosition() != cut_length) // Full speed
@@ -308,17 +311,12 @@ void cutElement(int quantity, float length) {
                 stepper.run();
             }
         stepper.stop(); // stop as fast as possible: sets new target
-        // add something in the future, to manually fire the blade
-        // this method will not work the best in practice
-        bladeDown();
-        bladeUp();
-        stopActuator();
+        bladeDownAndUp();
         stepper.setCurrentPosition(0);
     }
 }
 
 
 void loop() {
-    // testing GUI
     checkSerial();
 }
