@@ -261,7 +261,7 @@ Public Class Form1
             cutElementsProgressBar.Value += 1
             writeSerial(b)
         Else
-            MsgBox("All elements have been cut, please enter a new quantity")
+            MsgBox(" All elements have been cut " & vbCrLf & " Please re-send number of traces and quantity to Arudino ")
         End If
 
     End Sub
