@@ -1,41 +1,8 @@
-/*
- *
- * Z Axis CTF Cutter Version 1.0
- * Using 1610 CNC Kit
- *
- * Author: John Glatts
- * Date: 5/22/19
- *
- * 6/3/19 New Setup
- *  - Use MM instead of inches
- *  - Half to be careful when selecting new steps/rev speed, i.e half-step
- *  - Have a macro setup just for MM's and pass in the length in MM
- *      - 200 steps = 4mm
- *      - 1mm = 50 steps
- *
- *  - The best results come from 1/16th stepping. The stepper moves slower,
- *    but is able to reach the target more accurately
- *
- *  - Refactor the emergency stop logic sequences
- *
- *  - Get some sort of GUI working --> wait for camera then add a raspberry pi
- *      - Visual Basic GUI seems to be working fine
- *      - Maybe use the pi for camera processing
- *
- *  - Seems that the best e-stop will be resetting the Arduino itself
- *
- *  - Tweak the actuator algorithms
- *      - After a few moves 'down', the actuator will not be in the same position
- *
- *  - Reevaulate if using macros for things like the mm constant are causing the UB
- *    - First, just add another check to checkSerial() -- and just throw the .5 after the divison
- *
- */
 #include <AccelStepper.h>
 #include "PinDefines.h"
 
 
- // Setup a new instance of AccelStepper
+// Setup a new instance of AccelStepper
 AccelStepper stepper(AccelStepper::DRIVER, STEP_PIN, DIR_PIN);
 
 
@@ -74,7 +41,7 @@ void updateQuantity(int qty) {
 void checkSerial() {
 	if (Serial.available() > 0) {
 		digitalWrite(ENA_PIN, HIGH);    // make sure motor is on
-		
+
 		int val = Serial.read();
 
 		if ((val < 100) || (val > 200)) {
@@ -113,29 +80,29 @@ void checkSerial() {
 			  //bladeUp(); not used, add something useful
 				break;
 			case 109:   // one inch move
-				moveStepperTo(25.4);
+				moveStepperTo(INCH);
 				break;
 			case 110:   // .1 inch move
-				moveStepperTo(2.54);
+				moveStepperTo(TENTH);
 				break;
 			case 111:   // .01 inch move
-				moveStepperTo(0.254);
+				moveStepperTo(TEN_MIL);
 				break;
 			case 112:   // .001 inch move
-				moveStepperTo(0.0254);
+				moveStepperTo(ONE_MIL);
 				break;
 				// inch moves for the other direction
 			case 113:
-				moveStepperTo(-25.4);
+				moveStepperTo(-INCH);
 				break;
 			case 114:
-				moveStepperTo(-2.54);
+				moveStepperTo(-TENTH);
 				break;
 			case 115:
-				moveStepperTo(-0.254);
+				moveStepperTo(-TEN_MIL);
 				break;
 			case 116:
-				moveStepperTo(-0.0254);
+				moveStepperTo(-ONE_MIL);
 				break;
 			case 117:   // emergency stop, by resetting the arduino
 				digitalWrite(RST, LOW);
@@ -150,6 +117,8 @@ void checkSerial() {
 			case 120:   // 1/8th of a Mil move -- left
 				moveStepperTo(-0.003);
 				break;
+			case 121:
+				calibrateStepperAccuracy();
 			default:
 				break;
 			}
@@ -217,6 +186,26 @@ void makeReferenceCut(int increment) {
 	}
 	stepper.setCurrentPosition(0);
 	delay(2000);
+}
+
+
+/* 
+* Attempt to calibrate the stepper motor
+* Also attempt at sending out serial data to the GUI
+*/
+void calibrateStepperAccuracy() {
+	long half_inch = TENTH * 5;
+	
+	// because the the GUI is in VB, Serial.println() will work
+	// will be costly though
+	stepper.setCurrentPosition(0);
+	stepper.moveTo(half_inch);
+	while (stepper.currentPosition() != half_inch) // Full speed
+		stepper.run();
+		Serial.write(stepper.currentPosition());	// this may slow down perfomance but check it out anyway
+	stepper.stop();
+	stepper.setCurrentPosition(0);
+	Serial.write("done");
 }
 
 
