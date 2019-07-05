@@ -54,7 +54,7 @@ Public Class Form1
 
     End Sub
 
-    Private Sub btnEmergStop_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnEmergStop.Click
+    Private Sub btnEmergStop_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
         ' the arduino is getting 'stuck' trying to keep on resetting
         Dim b() As Byte = New Byte() {117}
 
@@ -246,22 +246,29 @@ Public Class Form1
 
     Private Sub btnCutMove_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnCutMove.Click
         Dim cut_length As Decimal
+        Dim msg As Integer
         Dim b() As Byte = New Byte() {118}
+        Dim m() As Byte = New Byte() {121}  ' add this case to the .ino file
 
         ' update the text box
-        ' test if this will clear what was remaining
-        cut_length = ((g_traces + 1) / 2) / 25.4
+        cut_length = ((g_traces + 1) / 2) / 25.4   ' length of the G4 element in inches
         distance_travelled = Decimal.Round(cut_length, 3)
         txtDistTravel.Text = Decimal.Round(cut_length, 3)
 
-        ' update the progess bar
-        ' figure out if this will work better when the blade down btn is clicked
-        ' also work in the quantity of elements and correspond the value with the progress bar
+        ' update progess bar
         If cutElementsProgressBar.Value < cutElementsProgressBar.Maximum Then
             cutElementsProgressBar.Value += 1
             writeSerial(b)
         Else
-            MsgBox(" All elements have been cut " & vbCrLf & " Please re-send number of traces and quantity to Arudino ")
+            msg = MsgBox(" All elements have been cut " & vbCrLf & " Cut More? ", vbYesNo + vbExclamation)
+            Select Case msg ' what button?
+                Case 6  ' yes button
+                    writeSerial(m)
+                    cutElementsProgressBar.Value = 0    ' reset the the quanity value back to 0
+                    ' MsgBox("You clicked 'YES' button.")
+                Case 7  ' no button
+                    ' MsgBox("You clicked 'NO' button.")
+            End Select
         End If
 
     End Sub
@@ -301,4 +308,31 @@ Public Class Form1
 
     End Sub
 
+    Private Sub btnCalibrateMotor_Click(sender As Object, e As EventArgs) Handles btnCalibrateMotor.Click
+        Dim b() As Byte = New Byte() {121}
+        Dim Incoming As String
+        Dim flag As Boolean = False
+
+        writeSerial(b)
+
+        btnDisableMotor.ForeColor = Color.Black
+
+
+        While Not flag
+            Try
+                Incoming = SerialPort1.ReadExisting()
+                If Incoming Is Nothing Then
+                    MsgBox("nothing" & vbCrLf)
+                ElseIf Incoming = "done" Then
+                    flag = True
+                Else
+                    MsgBox(Incoming)
+                End If
+            Catch ex As TimeoutException
+                MsgBox("Error: Serial Port read timed out.")
+            End Try
+        End While
+
+
+    End Sub
 End Class
