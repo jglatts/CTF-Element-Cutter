@@ -106,9 +106,7 @@
 					moveStepperTo(-0.003);
 					break;
 				case 121:
-					//calibrateStepperAccuracy();   // <--- but need to get this working
-					moveStepperTo(TENTH * 5);
-					Serial.print("done");	// !!!!!!!!!!! MUST BE SERIAL.PRINT() !!!!!!!!!!!!!!!!
+					calibrateStepperAccuracy();   // <--- but need to get this working
 				default:
 					break;
 				}
@@ -127,34 +125,6 @@
 	void updateQuantity(int qty) {
 		g4_cut_quantity = qty % 200;
 	}
-
-
-	/*
-	* Send data, via serial to GUI
-	* Having problems getting the GUI to recongize when to stop
-	* Test it out mane
-	*/
-	void writeToGUI() {
-		// wait until the stop command comes in
-		bool check;
-		
-		Serial.println("sup");
-		Serial.println("done");
-
-		/*
-		while (!check) {
-			if (Serial.available() > 0) {
-				// poss change to a do-while
-				if (Serial.read() != 169) {
-					Serial.print("done"); // maybe have to use println()
-				}
-				else {
-					check = true;
-				}
-			}
-		  }
-		*/
-		}
 	
 
 	/*
@@ -162,13 +132,9 @@
 	* Also attempt at sending out serial data to the GUI
 	*/
 	void calibrateStepperAccuracy() {
-		float half_inch = TENTH * 5;
-
-		stepper.moveTo(half_inch);
-		while (stepper.currentPosition() != half_inch) // Full speed
-			stepper.run();
-		stepper.stop();
-		stepper.setCurrentPosition(0);
+		moveStepperTo(TEN_MIL * 8);
+		delay(1000);
+		moveStepperTo(TEN_MIL * 4);
 		Serial.print("done");
 	}
 
@@ -207,8 +173,8 @@
 		//(c_length > 1) ? c_length += 6.35 : c_length -= 6.35;
 
 		// int n_distance = MM * c_length;
-		//long n_distance = MM * c_length;
-		float n_distance = MM * c_length; // float seems to be working the best
+		long n_distance = MM * c_length;
+		//float n_distance = MM * c_length; // float seems to be working the best
 
 		stepper.moveTo(n_distance);
 		while (stepper.currentPosition() != n_distance) // Full speed
