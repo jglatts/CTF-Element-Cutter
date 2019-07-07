@@ -334,7 +334,7 @@ Public Class Form1
                     MsgBox("nothing" & vbCrLf)
                 ElseIf Incoming = "done" Then
                     flag = True
-                    MsgBox("Motor is Calibrated and Ready to Go!")
+                    MsgBox("Motor is Calibrated and Ready to Go!", vbInformation)
                 Else
                     MsgBox("Motor Moving -- Please close and check again")
                 End If
