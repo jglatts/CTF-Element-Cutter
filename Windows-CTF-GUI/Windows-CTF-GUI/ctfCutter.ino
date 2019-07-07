@@ -138,7 +138,6 @@
 		// wait until the stop command comes in
 		bool check;
 		
-		Serial.println("sup nigga");
 		Serial.println("sup");
 		Serial.println("done");
 
