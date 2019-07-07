@@ -14,12 +14,14 @@ Public Class Form1
 
         ' set up serial port
         SerialPort1.PortName = "COM6" ' check And change Arduino port
-        SerialPort1.BaudRate = 9600   ' make sure Arduino serial is set at 9600 bps  
+        SerialPort1.BaudRate = 115200   ' make sure Arduino serial is set at 115200 bps  
         SerialPort1.DataBits = 8
         SerialPort1.Parity = Parity.None
         SerialPort1.StopBits = StopBits.One
         SerialPort1.Handshake = Handshake.None
         SerialPort1.Encoding = System.Text.Encoding.Default ' maybe change to UTF-8, incase any strings are sent
+        SerialPort1.ReadTimeout = 1000 ' keep at 1000 -- it's working
+
 
         ' hide cut length stuff
         Form1.lblCutLength.Visible = False
@@ -310,29 +312,37 @@ Public Class Form1
 
     Private Sub btnCalibrateMotor_Click(sender As Object, e As EventArgs) Handles btnCalibrateMotor.Click
         Dim b() As Byte = New Byte() {121}
+        Dim b_done() As Byte = New Byte() {169}
+        Dim flag As Boolean
         Dim Incoming As String
-        Dim flag As Boolean = False
 
         writeSerial(b)
-
         btnDisableMotor.ForeColor = Color.Black
 
 
+        ' Have to tweak the while loop b/c the MsgBox has to be clicked all the time
+        ' in order to recieve the "done" string
+        ' so close to getting it !
+        ' fucking lame -- sometimes work and sometime doesnt WTF
+        ' also, this seems like overkill
         While Not flag
             Try
+                SerialPort1.Open()
                 Incoming = SerialPort1.ReadExisting()
+                SerialPort1.Close()
                 If Incoming Is Nothing Then
                     MsgBox("nothing" & vbCrLf)
                 ElseIf Incoming = "done" Then
                     flag = True
+                    MsgBox("Motor is Calibrated and Ready to Go!")
                 Else
-                    MsgBox(Incoming)
+                    MsgBox("Motor Moving -- Please close and check again")
                 End If
-            Catch ex As TimeoutException
+            Catch ex As InvalidOperationException
                 MsgBox("Error: Serial Port read timed out.")
+                SerialPort1.Close()
             End Try
         End While
-
 
     End Sub
 End Class
