@@ -9,7 +9,7 @@ Public Class Form1
     Shared distance_travelled As Decimal
     Shared g_traces As Integer
     Shared stepper_data As Byte()
-
+    Shared motor_steps As Integer
     Private Shared Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
 
         ' set up serial port
@@ -30,8 +30,6 @@ Public Class Form1
 
 
     End Sub
-
-
     Private Sub btnHome_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnHome.Click
 
         Dim b() As Byte = New Byte() {100}
@@ -261,6 +259,8 @@ Public Class Form1
         If cutElementsProgressBar.Value < cutElementsProgressBar.Maximum Then
             cutElementsProgressBar.Value += 1
             writeSerial(b)
+            ' wait for the number of steps to come back through Serial Port
+            readSerial(stepper_data)
         Else
             msg = MsgBox(" All elements have been cut " & vbCrLf & " Cut More? ", vbYesNo + vbExclamation)
             Select Case msg ' what button?
@@ -287,11 +287,21 @@ Public Class Form1
     Private Sub readSerial(ByVal step_data As Byte())
         ' read data from the serial port
         ' test this badboy out
+        Dim done As Boolean
+        Dim incoming_steps As String
 
         SerialPort1.Open()
-        ' may have to change from byte array to something larger
-        ' or maybe it can handle it
-        SerialPort1.Read(step_data, 0, 1)
+        While Not done
+            Try
+                incoming_steps = SerialPort1.ReadExisting()
+                If incoming_steps <> Nothing Then
+                    MsgBox(incoming_steps)  ' get the number of steps to calculate how far motor actually went 
+                    done = True
+                End If
+            Catch ex As InvalidOperationException
+                MsgBox("Error: Serial Port read timed out.")
+            End Try
+        End While
         SerialPort1.Close()
 
     End Sub
@@ -319,12 +329,6 @@ Public Class Form1
         writeSerial(b)
         btnDisableMotor.ForeColor = Color.Black
 
-
-        ' Have to tweak the while loop b/c the MsgBox has to be clicked all the time
-        ' in order to recieve the "done" string
-        ' so close to getting it !
-        ' fucking lame -- sometimes work and sometime doesnt WTF
-        ' also, this seems like overkill
         While Not flag
             Try
                 SerialPort1.Open()
@@ -343,6 +347,5 @@ Public Class Form1
                 SerialPort1.Close()
             End Try
         End While
-
     End Sub
 End Class
