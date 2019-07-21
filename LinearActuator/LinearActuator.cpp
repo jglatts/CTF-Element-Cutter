@@ -2,7 +2,7 @@
 #include "LinearActuator.h"
 
 
-// set-up constructer 
+// set-up constructor 
 Actuator::Actuator(int r_1, int r_2) {
 	relay_1 = r_1;
 	relay_2 = r_2;
