@@ -1,0 +1,25 @@
+#######################################
+# Syntax Coloring Map For LinearActuator
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Acuator	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+bladeDownAndUp	KEYWORD2
+bladeDown	KEYWORD2
+bladeUp	KEYWORD2
+bladeStop	KEYWORD2
+
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+ 
