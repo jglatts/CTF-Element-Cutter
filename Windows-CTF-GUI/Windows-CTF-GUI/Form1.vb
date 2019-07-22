@@ -23,6 +23,7 @@ Public Class Form1
         SerialPort1.ReadTimeout = 1000 ' keep at 1000 -- it's working
 
         ' hide cut length stuff
+        Form1.txtDistTravel.Text = 0
         Form1.lblCutLength.Visible = False
         Form1.txtCutLength.Visible = False
         Form1.lblCutLengthInches.Visible = False
@@ -151,8 +152,8 @@ Public Class Form1
 
         Dim b() As Byte = New Byte() {114}
 
-        distance_travelled -= 0.1
-        txtDistTravel.Text = distance_travelled
+        ' distance_travelled -= 0.1
+        txtDistTravel.Text -= 0.1
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -165,9 +166,8 @@ Public Class Form1
 
         Dim b() As Byte = New Byte() {115}
 
-        distance_travelled -= 0.01
-        txtDistTravel.Text = distance_travelled
-
+        ' distance_travelled -= 0.01
+        txtDistTravel.Text -= 0.01
         btnDisableMotor.ForeColor = Color.Black
 
         last_command = "Moved 0.01 Inch Left"
@@ -180,7 +180,7 @@ Public Class Form1
         Dim b() As Byte = New Byte() {116}
 
         distance_travelled -= 0.001
-        txtDistTravel.Text = distance_travelled
+        txtDistTravel.Text -= 0.001
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -195,7 +195,7 @@ Public Class Form1
 
         ' update the distance travelled textbox
         distance_travelled += 1.0
-        txtDistTravel.Text = distance_travelled
+        txtDistTravel.Text += 1.0
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -209,7 +209,7 @@ Public Class Form1
         Dim b() As Byte = New Byte() {110}
 
         distance_travelled += 0.1
-        txtDistTravel.Text = distance_travelled
+        txtDistTravel.Text += 0.1
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -223,7 +223,7 @@ Public Class Form1
         Dim b() As Byte = New Byte() {111}
 
         distance_travelled += 0.01
-        txtDistTravel.Text = distance_travelled
+        txtDistTravel.Text += 0.01
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -232,12 +232,12 @@ Public Class Form1
 
     End Sub
 
-    Private Sub btnMilRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnMilRight.Click
+    Private Sub btnMilRight_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
 
         Dim b() As Byte = New Byte() {112}
 
         distance_travelled += 0.001
-        txtDistTravel.Text = distance_travelled
+        txtDistTravel.Text += 0.001
 
         btnDisableMotor.ForeColor = Color.Black
 
@@ -251,9 +251,6 @@ Public Class Form1
         Dim b() As Byte = New Byte() {118}
         Dim m() As Byte = New Byte() {121}  ' add this case to the .ino file
 
-        ' update the text box
-        cut_length = ((g_traces + 1) / 2) / 25.4   ' length of the G4 element in inches
-        txtCutLength.Text = cut_length
         last_command = "Made cut move for G4"
         writeSerial(b, last_command)
         readSerial()    ' wait for information 
@@ -277,7 +274,7 @@ Public Class Form1
         ' read data from the serial port
         ' update corresponding GUI elements
         Dim done As Boolean
-        Dim inches As Double
+        Dim inches As Decimal
         SerialPort1.Open()
         While Not done
             Try
@@ -286,10 +283,10 @@ Public Class Form1
                 If incoming <> Nothing Then
                     If incoming > 100 Then
                         ' the amount of steps has been sent
-                        inches = (incoming / 200) * 0.04
+                        inches = (incoming / 200) * 0.0393701
                         txtBoxStepsTaken.Text = incoming
-                        txtBoxInchesMoved.Text = inches
-                        txtDistTravel.Text = inches
+                        txtBoxInchesMoved.Text = Decimal.Round(inches, 3)
+                        txtDistTravel.Text = Decimal.Round(inches, 3)
                     Else
                         ' elapsed time has been sent
                         txtBoxMotorTime.Text = incoming
@@ -318,45 +315,29 @@ Public Class Form1
 
     End Sub
 
-    Private Sub Label17_Click(sender As Object, e As EventArgs) Handles Label17.Click
+    Private Sub btnMilRight_Click_1(sender As Object, e As EventArgs) Handles btnMilRight.Click
+        Dim b() As Byte = New Byte() {112}
+
+        distance_travelled += 0.001
+        txtDistTravel.Text += 0.001
+
+        btnDisableMotor.ForeColor = Color.Black
+
+        last_command = "Moved 0.001 Inch Right"
+        writeSerial(b, last_command)
 
     End Sub
 
     Private Sub btnCalibrateMotor_Click(sender As Object, e As EventArgs) Handles btnCalibrateMotor.Click
         Dim b() As Byte = New Byte() {121}
-        Dim flag As Boolean
-        Dim elap_time As Integer    ' use another structure for the reaminder (i.e, seconds)
+        'Dim flag As Boolean
+        'Dim elap_time As Integer    ' use another structure for the reaminder (i.e, seconds)
 
         last_command = "Calibrated Motor"
         writeSerial(b, last_command)
         btnDisableMotor.ForeColor = Color.Black
+        readSerial()
 
-        While Not flag
-            Try
-                SerialPort1.Open()
-                Dim Incoming As String = SerialPort1.ReadExisting()
-                SerialPort1.Close() ' may have to move this to the btm
-                If Incoming Is Nothing Then
-                    MsgBox("nothing" & vbCrLf)
-                ElseIf Incoming > 100 Then
-                    ' amount of steps has been sent 
-                    txtBoxStepsTaken.Text = Incoming
-                    txtBoxInchesMoved.Text = Incoming / 200
-                    txtDistTravel.Text = Incoming / 200
-                ElseIf Incoming < 100 Then
-                    ' that ElseIf may not work but fuck it try it anyway 
-                    ' elapsed time has been sent 
-                    txtBoxMotorTime.Text = Incoming
-                    MsgBox("Motor Is Calibrated! Completed in: " & elap_time & " seconds.")
-                    flag = True
-                Else
-                    MsgBox("Motor Moving -- Please close and check again", vbExclamation)
-                End If
-            Catch ex As InvalidOperationException
-                MsgBox("Error: Serial Port read timed out.")
-                SerialPort1.Close()
-            End Try
-        End While
     End Sub
 
 End Class
