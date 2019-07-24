@@ -1,5 +1,5 @@
  // Pin defines
- // the board is a mega2560
+ // board : mega2560
 
 
 #define RST 3
@@ -17,7 +17,7 @@
 #define MM 200  // 50 * 4 --> motor is on 1/4 step
 
 
-// globals to hold information about the G4 element
+// G4 element info globals
 double g4_cut_size;
 int g4_cut_quantity;
 
