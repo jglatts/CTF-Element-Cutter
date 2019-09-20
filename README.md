@@ -8,7 +8,7 @@ Actively Developed
 
 
 # Check out ***Windows-CUT-GUI*** 
-Updated version of the GUI using visual basic and studio.
+Updated version of the GUI using visual basic
 
 
 
